@@ -2,8 +2,8 @@
 
 # Copyright (C) 2003. Vladimir Prus
 # Distributed under the Boost Software License, Version 1.0.
-# (See accompanying file LICENSE_1_0.txt or copy at
-# http://www.boost.org/LICENSE_1_0.txt)
+# (See accompanying file LICENSE.txt or copy at
+# https://www.bfgroup.xyz/b2/LICENSE.txt)
 
 # Test that the <dll-path> property is correctly set when using
 # <hardcode-dll-paths>true.
@@ -140,8 +140,8 @@ t.expect_addition("bin/$toolset/debug*/mp.pathlist")
 es1 = t.adjust_name("a/bin/$toolset/debug*")
 es2 = t.adjust_name("b/bin/$toolset/debug*")
 
-t.expect_content_lines("bin/$toolset/debug*/mp.pathlist", "*" + es1);
-t.expect_content_lines("bin/$toolset/debug*/mp.pathlist", "*" + es2);
+t.expect_content_lines("bin/$toolset/debug*/mp.pathlist", "*" + es1)
+t.expect_content_lines("bin/$toolset/debug*/mp.pathlist", "*" + es2)
 
 t.rm("bin/$toolset/debug*/mp.pathlist")
 

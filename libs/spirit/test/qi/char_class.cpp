@@ -139,6 +139,7 @@ main()
         BOOST_TEST(test("0", xdigit));
         BOOST_TEST(test("f", xdigit));
         BOOST_TEST(!test("g", xdigit));
+        BOOST_TEST(!test("\xF1", print));
     }
 
     {
@@ -191,11 +192,6 @@ main()
         BOOST_TEST(test(L"0", xdigit));
         BOOST_TEST(test(L"f", xdigit));
         BOOST_TEST(!test(L"g", xdigit));
-
-        // TODO: these tests are suspicious, they do not test unicode
-        BOOST_TEST(test("\xE9", alpha));
-        BOOST_TEST(test("\xE9", lower));
-        BOOST_TEST(!test("\xE9", upper));
     }
 
     {   // test attribute extraction

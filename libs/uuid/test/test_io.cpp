@@ -5,7 +5,7 @@
 
 // Distributed under the Boost Software License, Version 1.0. (See
 // accompanying file LICENSE_1_0.txt or copy at
-// http://www.boost.org/LICENSE_1_0.txt)
+// https://www.boost.org/LICENSE_1_0.txt)
 
 //  libs/uuid/test/test_io.cpp  -------------------------------//
 
@@ -146,6 +146,39 @@ int main(int, char*[])
 #endif
 
 #endif
+
+    {
+        char buf[36] = {};
+        BOOST_TEST(to_chars(u3, &buf[0], &buf[36]));
+        BOOST_TEST(std::string(buf, 36) == std::string("12345678-90ab-cdef-1234-567890abcdef"));
+    }
+    {
+        char buf[37] = {}; // will be null-terminated
+        BOOST_TEST(to_chars(u3, &buf[0], &buf[37]));
+        BOOST_TEST(std::string(buf) == std::string("12345678-90ab-cdef-1234-567890abcdef"));
+    }
+    {
+        char buf[35] = {};
+        BOOST_TEST(!to_chars(u3, &buf[0], &buf[35]));
+    }
+    {
+        char buf[36] = {};
+        char* ret = to_chars(u3, &buf[0]);
+        BOOST_TEST(ret == &buf[36]);
+        BOOST_TEST(std::string(buf, 36) == std::string("12345678-90ab-cdef-1234-567890abcdef"));
+    }
+    {
+        char buf[36] = {};
+        char* ret = to_chars(u3, buf); // decay
+        BOOST_TEST(ret == &buf[36]);
+        BOOST_TEST(std::string(buf, 36) == std::string("12345678-90ab-cdef-1234-567890abcdef"));
+    }
+    {
+        char buf[37] = {}; // will be null-terminated
+        char* ret = to_chars(u3, buf);
+        BOOST_TEST(ret == &buf[36]);
+        BOOST_TEST(std::string(buf) == std::string("12345678-90ab-cdef-1234-567890abcdef"));
+    }
 
     BOOST_TEST(to_string(u1) == std::string("00000000-0000-0000-0000-000000000000"));
     BOOST_TEST(to_string(u3) == std::string("12345678-90ab-cdef-1234-567890abcdef"));

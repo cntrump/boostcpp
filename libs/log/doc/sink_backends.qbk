@@ -15,7 +15,7 @@
 
 The text output stream sink backend is the most generic backend provided by the library out of the box. The backend is implemented in the [class_sinks_basic_text_ostream_backend] class template (`text_ostream_backend` and `wtext_ostream_backend` convenience typedefs provided for narrow and wide character support). It supports formatting log records into strings and putting into one or several streams. Each attached stream gets the same result of formatting, so if you need to format log records differently for different streams, you will need to create several sinks - each with its own formatter.
 
-The backend also provides a feature that may come useful when debugging your application. With the `auto_flush` method one can tell the sink to automatically flush the buffers of all attached streams after each log record is written. This will, of course, degrade logging performance, but in case of an application crash there is a good chance that last log records will not be lost.
+The backend also provides a feature that may come useful when debugging your application. With the `auto_flush` method one can tell the sink to automatically flush the buffers of all attached streams after each log record is written. This will, of course, degrade logging performance, but in case of an application crash there is a good chance that last log records are not lost.
 
 [example_sinks_ostream]
 
@@ -226,6 +226,8 @@ In order for file appending to actually happen, it is important that the name of
     #include <``[boost_log_sinks_text_multifile_backend_hpp]``>
 
 While the text stream and file backends are aimed to store all log records into a single file/stream, this backend serves a different purpose. Assume we have a banking request processing application and we want logs related to every single request to be placed into a separate file. If we can associate some attribute with the request identity then the [class_sinks_text_multifile_backend] backend is the way to go.
+
+[note During its operation, the multi-file backend frequently opens and closes log files, which means that the cost of these operations on a given system will be significant to the logging performance. Windows, especially with antivirus software running, is known to have extremely expensive file open and close operations. For example, compared to Linux, closing a file can be in the order of /hundreds/ times slower, according to [@https://lists.boost.org/Archives/boost/2021/03/250968.php some] [@https://gregoryszorc.com/blog/2015/10/22/append-i/o-performance-on-windows/ reports]. Consider creating multiple [link log.detailed.sink_backends.text_file `text_file_backend`] sinks with appropriate filters or running `text_multifile_backend` as an [link log.detailed.sink_frontends.async asynchronous] sink if you are affected.]
 
 [example_sinks_multifile]
 

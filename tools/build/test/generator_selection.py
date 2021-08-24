@@ -2,8 +2,8 @@
 
 # Copyright 2008, 2012 Jurko Gospodnetic
 # Distributed under the Boost Software License, Version 1.0.
-# (See accompanying file LICENSE_1_0.txt or copy at
-# http://www.boost.org/LICENSE_1_0.txt)
+# (See accompanying file LICENSE.txt or copy at
+# https://www.bfgroup.xyz/b2/LICENSE.txt)
 
 # Tests that generators get selected correctly.
 #
@@ -60,6 +60,7 @@ actions generate-a-cpp-file { $(CREATE-FILE) "$(<)" }
 """)
 
     t.write("Other/mygen.py", """\
+from __future__ import print_function
 import b2.build.generators as generators
 import b2.build.type as type
 
@@ -74,7 +75,7 @@ if os.name == 'nt':
 else:
     action = 'echo "void g() {}" > "$(<)"'
 def f(*args):
-    print "Generating a CPP file..."
+    print("Generating a CPP file...")
 
 get_manager().engine().register_action("mygen.generate-a-cpp-file", action,
     function=f)

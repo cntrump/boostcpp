@@ -19,7 +19,6 @@
 #include <boost/beast/http.hpp>
 #include <boost/beast/version.hpp>
 #include <boost/asio.hpp>
-#include <boost/filesystem.hpp>
 #include <chrono>
 #include <cstdlib>
 #include <cstring>
@@ -111,7 +110,7 @@ private:
     boost::optional<http::request_parser<request_body_t, alloc_t>> parser_;
 
     // The timer putting a time limit on requests.
-    net::basic_waitable_timer<std::chrono::steady_clock> request_deadline_{
+    net::steady_timer request_deadline_{
         acceptor_.get_executor(), (std::chrono::steady_clock::time_point::max)()};
 
     // The string-based response message.
@@ -293,12 +292,11 @@ private:
         if (request_deadline_.expiry() <= std::chrono::steady_clock::now())
         {
             // Close socket to cancel any outstanding operation.
-            beast::error_code ec;
             socket_.close();
 
             // Sleep indefinitely until we're given a new deadline.
             request_deadline_.expires_at(
-                std::chrono::steady_clock::time_point::max());
+                (std::chrono::steady_clock::time_point::max)());
         }
 
         request_deadline_.async_wait(

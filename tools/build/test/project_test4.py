@@ -3,7 +3,7 @@
 # Copyright 2003 Dave Abrahams
 # Copyright 2002, 2003, 2004 Vladimir Prus
 # Distributed under the Boost Software License, Version 1.0.
-# (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
+# (See accompanying file LICENSE.txt or https://www.bfgroup.xyz/b2/LICENSE.txt)
 
 import BoostBuild
 
@@ -43,7 +43,7 @@ t.copy("lib/jamfile3.jam", "lib/jamfile.jam")
 # Link-compatibility check for rtti is disabled...
 #t.run_build_system(status=None)
 #import string
-#t.fail_test(string.find(t.stdout(),
+#t.fail_test(t.stdout().find(
 #"""warning: targets produced from b.obj are link incompatible
 #warning: with main target a.exe""") !=-0)
 

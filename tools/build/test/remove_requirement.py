@@ -2,8 +2,8 @@
 
 # Copyright (C) Vladimir Prus 2006.
 # Distributed under the Boost Software License, Version 1.0. (See
-# accompanying file LICENSE_1_0.txt or copy at
-# http://www.boost.org/LICENSE_1_0.txt)
+# accompanying file LICENSE.txt or copy at
+# https://www.bfgroup.xyz/b2/LICENSE.txt)
 
 import BoostBuild
 
@@ -57,10 +57,10 @@ exe hello : hello.cpp ;
 
 t.run_build_system()
 
-t.expect_addition("sub/bin/$toolset/debug/link-static*/hello.exe")
-t.expect_addition("sub2/bin/$toolset/debug/link-static*/hello.exe")
-t.expect_addition("sub3/bin/$toolset/debug/threading-multi*/hello.exe")
-t.expect_addition("sub4/bin/$toolset/debug/threading-multi*/hello.exe")
+t.expect_addition("sub/bin/$toolset/debug*/link-static*/hello.exe")
+t.expect_addition("sub2/bin/$toolset/debug*/link-static*/hello.exe")
+t.expect_addition("sub3/bin/$toolset/debug*/threading-multi*/hello.exe")
+t.expect_addition("sub4/bin/$toolset/debug*/threading-multi*/hello.exe")
 
 t.rm(".")
 

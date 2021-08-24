@@ -10,15 +10,20 @@
 #define BOOST_SPIRIT_TEST_QI_REAL_HPP
 
 #include <climits>
-#include <boost/math/concepts/real_concept.hpp>
 #include <boost/detail/lightweight_test.hpp>
 #include <boost/spirit/include/qi_char.hpp>
 #include <boost/spirit/include/qi_numeric.hpp>
 #include <boost/spirit/include/qi_operator.hpp>
-#include <boost/math/special_functions/fpclassify.hpp>
-#include <boost/math/special_functions/sign.hpp>
 
 #include "test.hpp"
+
+#include <boost/core/cmath.hpp>
+
+#ifndef BOOST_NO_CXX11_SFINAE_EXPR
+# include <boost/math/concepts/real_concept.hpp>
+#else
+# define BOOST_SPIRIT_NO_MATH_REAL_CONCEPT
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 //  These policies can be used to parse thousand separated
@@ -98,9 +103,9 @@ struct no_leading_dot_policy : boost::spirit::qi::real_policies<T>
 
 template <typename T>
 bool
-compare(T n, double expected)
+compare(T n, double expected
+  , T const eps = std::pow(10.0, -std::numeric_limits<T>::digits10))
 {
-    T const eps = std::pow(10.0, -std::numeric_limits<T>::digits10);
     T delta = n - expected;
     return (delta >= -eps) && (delta <= eps);
 }
@@ -112,13 +117,13 @@ struct custom_real
     double n;
     custom_real() : n(0) {}
     custom_real(double n_) : n(n_) {}
-    friend bool operator==(custom_real a, custom_real b) 
+    friend bool operator==(custom_real a, custom_real b)
         { return a.n == b.n; }
-    friend custom_real operator*(custom_real a, custom_real b) 
+    friend custom_real operator*(custom_real a, custom_real b)
         { return custom_real(a.n * b.n); }
-    friend custom_real operator+(custom_real a, custom_real b) 
+    friend custom_real operator+(custom_real a, custom_real b)
         { return custom_real(a.n + b.n); }
-    friend custom_real operator-(custom_real a, custom_real b) 
+    friend custom_real operator-(custom_real a, custom_real b)
         { return custom_real(a.n - b.n); }
 };
 

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2003-2019 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+# Copyright (c) 2003-2021 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 #
 # Distributed under the Boost Software License, Version 1.0. (See accompanying
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -48,6 +48,14 @@ project
   ;
 
 test-suite "asio" :
+  [ link associated_allocator.cpp ]
+  [ link associated_allocator.cpp : $(USE_SELECT) : associated_allocator_select ]
+  [ link associated_cancellation_slot.cpp ]
+  [ link associated_cancellation_slot.cpp : $(USE_SELECT) : associated_cancellation_slot_select ]
+  [ link associated_executor.cpp ]
+  [ link associated_executor.cpp : $(USE_SELECT) : associated_executor_select ]
+  [ link associator.cpp ]
+  [ link associator.cpp : $(USE_SELECT) : associator_select ]
   [ link awaitable.cpp ]
   [ link awaitable.cpp : $(USE_SELECT) : awaitable_select ]
   [ link basic_datagram_socket.cpp ]
@@ -68,6 +76,8 @@ test-suite "asio" :
   [ link basic_streambuf.cpp : $(USE_SELECT) : basic_streambuf_select ]
   [ link basic_waitable_timer.cpp ]
   [ link basic_waitable_timer.cpp : $(USE_SELECT) : basic_waitable_timer_select ]
+  [ run bind_cancellation_slot.cpp ]
+  [ run bind_cancellation_slot.cpp : : : $(USE_SELECT) : bind_cancellation_slot_select ]
   [ run buffer.cpp ]
   [ run buffer.cpp : : : $(USE_SELECT) : buffer_select ]
   [ run buffered_read_stream.cpp ]
@@ -78,6 +88,12 @@ test-suite "asio" :
   [ run buffered_write_stream.cpp : : : $(USE_SELECT) : buffered_write_stream_select ]
   [ run buffers_iterator.cpp ]
   [ run buffers_iterator.cpp : : : $(USE_SELECT) : buffers_iterator_select ]
+  [ link cancellation_signal.cpp ]
+  [ link cancellation_signal.cpp : $(USE_SELECT) : cancellation_signal_select ]
+  [ link cancellation_state.cpp ]
+  [ link cancellation_state.cpp : $(USE_SELECT) : cancellation_state_select ]
+  [ link cancellation_type.cpp ]
+  [ link cancellation_type.cpp : $(USE_SELECT) : cancellation_type_select ]
   [ link co_spawn.cpp ]
   [ link co_spawn.cpp : $(USE_SELECT) : co_spawn_select ]
   [ link completion_condition.cpp ]
@@ -176,6 +192,8 @@ test-suite "asio" :
   [ run signal_set.cpp : : : $(USE_SELECT) : signal_set_select ]
   [ run socket_base.cpp ]
   [ run socket_base.cpp : : : $(USE_SELECT) : socket_base_select ]
+  [ run static_thread_pool.cpp ]
+  [ run static_thread_pool.cpp : : : $(USE_SELECT) : static_thread_pool_select ]
   [ link steady_timer.cpp ]
   [ link steady_timer.cpp : $(USE_SELECT) : steady_timer_select ]
   [ run strand.cpp ]
@@ -190,6 +208,8 @@ test-suite "asio" :
   [ link system_executor.cpp : $(USE_SELECT) : system_executor_select ]
   [ link this_coro.cpp ]
   [ link this_coro.cpp : $(USE_SELECT) : this_coro_select ]
+  [ run thread_pool.cpp ]
+  [ run thread_pool.cpp : : : $(USE_SELECT) : thread_pool_select ]
   [ link time_traits.cpp ]
   [ link time_traits.cpp : $(USE_SELECT) : time_traits_select ]
   [ link ts/buffer.cpp : : ts_buffer ]
@@ -233,3 +253,5 @@ test-suite "asio" :
   [ run write_at.cpp ]
   [ run write_at.cpp : : : $(USE_SELECT) : write_at_select ]
   ;
+
+build-project execution ;

@@ -1,13 +1,14 @@
 /*
  * Copyright 2015 Steven Watanabe
  * Distributed under the Boost Software License, Version 1.0.
- * (See accompanying file LICENSE_1_0.txt or copy at
- * http://www.boost.org/LICENSE_1_0.txt)
+ * (See accompanying file LICENSE.txt or copy at
+ * https://www.bfgroup.xyz/b2/LICENSE.txt)
  */
 
 #ifndef DEBUGGER_SW20150314_H
 #define DEBUGGER_SW20150314_H
 
+#include "config.h"
 #include <setjmp.h>
 #include "object.h"
 #include "frames.h"

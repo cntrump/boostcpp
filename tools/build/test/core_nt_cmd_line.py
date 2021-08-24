@@ -3,8 +3,8 @@
 # Copyright 2001 Dave Abrahams
 # Copyright 2011 Steven Watanabe
 # Distributed under the Boost Software License, Version 1.0.
-# (See accompanying file LICENSE_1_0.txt or copy at
-# http://www.boost.org/LICENSE_1_0.txt)
+# (See accompanying file LICENSE.txt or copy at
+# https://www.bfgroup.xyz/b2/LICENSE.txt)
 
 # Tests Windows command line construction.
 #
@@ -28,7 +28,7 @@ def string_of_length(n):
     n -= 1
     y = ['', '$(1x10-1)', '$(10x10-1)', '$(100x10-1)', '$(1000x10-1)']
     result = []
-    for i in reversed(xrange(5)):
+    for i in reversed(range(5)):
         x, n = divmod(n, 10 ** i)
         result += [y[i]] * x
     result.append('x')

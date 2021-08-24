@@ -111,6 +111,7 @@ function build_bjam ()
       libs/beast/test/beast/zlib//fat-tests \
       toolset=$TOOLSET \
       variant=$VARIANT \
+      link=static \
       -j${JOBS}
   elif [[ $VARIANT == "debug" ]]; then
     b2 \
@@ -148,7 +149,12 @@ if [[ $VARIANT == "beast_coverage" ]]; then
   lcov -a baseline.info -a testrun-all.info -o lcov-diff.info > /dev/null
   lcov -e "lcov-diff.info" "$INC_DIR/*" -o lcov.info > /dev/null
   lcov --remove "lcov.info" "$INC_DIR/_experimental/*" -o lcov.info > /dev/null
-  ~/.local/bin/codecov -X gcov -f lcov.info
+  echo "Change working directory for codecov:"
+  pwd
+  pushd .
+  cd libs/beast
+  ~/.local/bin/codecov -X gcov -f ../../lcov.info
+  popd
   find "$BOOST_ROOT" -name "*.gcda" | xargs rm -f
 
 elif [[ $VARIANT == "beast_valgrind" ]]; then

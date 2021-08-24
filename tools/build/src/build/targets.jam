@@ -1,8 +1,8 @@
 # Copyright Vladimir Prus 2002.
 # Copyright Rene Rivera 2006.
 # Distributed under the Boost Software License, Version 1.0.
-# (See accompanying file LICENSE_1_0.txt or copy at
-# http://www.boost.org/LICENSE_1_0.txt)
+# (See accompanying file LICENSE.txt or copy at
+# https://www.bfgroup.xyz/b2/LICENSE.txt)
 
 # Supports 'abstract' targets, which are targets explicitly defined in a
 # Jamfile.
@@ -342,7 +342,7 @@ class project-target : abstract-target
             self.alternative-names += [ $(target-instance).name ] ;
         }
     }
-    
+
     # Checks if an alternative was declared for the target.
     # Unlike checking for a main target this does not require
     # building the main targets. And hence can be used in/directly
@@ -887,7 +887,8 @@ rule resolve-reference ( target-reference : project )
     local id = $(split[1]) ;
     if ! $(split) || ! $(id)
     {
-        error "Malformed target reference $(target-reference)" ;
+        import errors ;
+        errors.error "Malformed target reference $(target-reference)" ;
     }
     local sproperties = ;
     if $(split[3])
@@ -1376,19 +1377,19 @@ class basic-target : abstract-target
                         [ property.change [ $(gur).raw ] : <relevant> ]
                         <relevant>$(relevant) ] ;
 
-                    if $(self.always)
-                    {
-                        for local t in $(result)
-                        {
-                            $(t).always ;
-                        }
-                    }
-
                     local s = [ create-subvariant $(result)
                         : [ virtual-target.recent-targets ]
                         : $(property-set) : $(source-targets)
                         : $(rproperties) : $(usage-requirements) ] ;
                     virtual-target.clear-recent-targets ;
+
+                    if $(self.always)
+                    {
+                        for local t in [ $(s).created-targets ]
+                        {
+                            $(t).always ;
+                        }
+                    }
 
                     local ur = [ compute-usage-requirements $(s) ] ;
                     ur = [ $(ur).add $(gur) ] ;
@@ -1634,7 +1635,7 @@ class typed-target : basic-target
                 ECHO "error: no generators were found for type '$(self.type)'" ;
                 ECHO "error: and the requested properties" ;
                 ECHO "error: make sure you've configured the needed tools" ;
-                ECHO "See http://boost.org/boost-build2/doc/html/bbv2/advanced/configuration.html" ;
+                ECHO "See https://www.bfgroup.xyz/b2/manual/release/index.html#bbv2.overview.configuration" ;
                 EXIT "To debug this problem, try the --debug-generators option."
                     ;
             }

@@ -14,7 +14,9 @@
 #include <boost/beast/_experimental/test/tcp.hpp>
 #include <boost/beast/_experimental/unit_test/suite.hpp>
 #include "test.hpp"
-
+#if BOOST_ASIO_HAS_CO_AWAIT
+#include <boost/asio/use_awaitable.hpp>
+#endif
 namespace boost {
 namespace beast {
 namespace websocket {
@@ -53,7 +55,9 @@ public:
     static
     void
     fail_loop(
-        std::function<void(stream<test::stream>&)> f,
+        std::function<void(
+            stream<test::basic_stream<net::io_context::executor_type>>&)>
+                f,
         std::chrono::steady_clock::duration amount =
             std::chrono::seconds(5))
     {
@@ -66,7 +70,8 @@ public:
             test::fail_count fc(n);
             try
             {
-                stream<test::stream> ws(ioc, fc);
+                stream<test::basic_stream<net::io_context::executor_type>> 
+                    ws(ioc, fc);
                 auto tr = connect(ws.next_layer());
                 f(ws);
                 break;
@@ -99,7 +104,7 @@ public:
         net::io_context ioc;
 
         // request in stream
-        fail_loop([&](stream<test::stream>& ws)
+        fail_loop([&](stream<test::basic_stream<net::io_context::executor_type>>& ws)
         {
             ws.next_layer().append(
                 "GET / HTTP/1.1\r\n"
@@ -114,7 +119,7 @@ public:
         });
 
         // request in stream, decorator
-        fail_loop([&](stream<test::stream>& ws)
+        fail_loop([&](stream<test::basic_stream<net::io_context::executor_type>>& ws)
         {
             ws.next_layer().append(
                 "GET / HTTP/1.1\r\n"
@@ -126,12 +131,14 @@ public:
                 "\r\n");
             ws.next_layer().read_size(20);
             bool called = false;
-            api.accept_ex(ws, res_decorator{called});
+            ws.set_option(stream_base::decorator(
+                res_decorator{called}));
+            api.accept(ws);
             BEAST_EXPECT(called);
         });
 
         // request in buffers
-        fail_loop([&](stream<test::stream>& ws)
+        fail_loop([&](stream<test::basic_stream<net::io_context::executor_type>>& ws)
         {
             api.accept(ws, sbuf(
                 "GET / HTTP/1.1\r\n"
@@ -145,23 +152,24 @@ public:
         });
 
         // request in buffers, decorator
-        fail_loop([&](stream<test::stream>& ws)
+        fail_loop([&](stream<test::basic_stream<net::io_context::executor_type>>& ws)
         {
             bool called = false;
-            api.accept_ex(ws, sbuf(
+            ws.set_option(stream_base::decorator(
+                res_decorator{called}));
+            api.accept(ws, sbuf(
                 "GET / HTTP/1.1\r\n"
                 "Host: localhost\r\n"
                 "Upgrade: websocket\r\n"
                 "Connection: upgrade\r\n"
                 "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\n"
                 "Sec-WebSocket-Version: 13\r\n"
-                "\r\n"),
-                res_decorator{called});
+                "\r\n"));
             BEAST_EXPECT(called);
         });
 
         // request in buffers and stream
-        fail_loop([&](stream<test::stream>& ws)
+        fail_loop([&](stream<test::basic_stream<net::io_context::executor_type>>& ws)
         {
             ws.next_layer().append(
                 "Connection: upgrade\r\n"
@@ -178,7 +186,7 @@ public:
         });
 
         // request in buffers and stream, decorator
-        fail_loop([&](stream<test::stream>& ws)
+        fail_loop([&](stream<test::basic_stream<net::io_context::executor_type>>& ws)
         {
             ws.next_layer().append(
                 "Connection: upgrade\r\n"
@@ -187,11 +195,12 @@ public:
                 "\r\n");
             ws.next_layer().read_size(16);
             bool called = false;
-            api.accept_ex(ws, sbuf(
+            ws.set_option(stream_base::decorator(
+                res_decorator{called}));
+            api.accept(ws, sbuf(
                 "GET / HTTP/1.1\r\n"
                 "Host: localhost\r\n"
-                "Upgrade: websocket\r\n"),
-                res_decorator{called});
+                "Upgrade: websocket\r\n"));
             BEAST_EXPECT(called);
         });
 
@@ -207,7 +216,7 @@ public:
             req.insert(http::field::sec_websocket_key, "dGhlIHNhbXBsZSBub25jZQ==");
             req.insert(http::field::sec_websocket_version, "13");
 
-            fail_loop([&](stream<test::stream>& ws)
+            fail_loop([&](stream<test::basic_stream<net::io_context::executor_type>>& ws)
             {
                 api.accept(ws, req);
             });
@@ -225,11 +234,12 @@ public:
             req.insert(http::field::sec_websocket_key, "dGhlIHNhbXBsZSBub25jZQ==");
             req.insert(http::field::sec_websocket_version, "13");
 
-            fail_loop([&](stream<test::stream>& ws)
+            fail_loop([&](stream<test::basic_stream<net::io_context::executor_type>>& ws)
             {
                 bool called = false;
-                api.accept_ex(ws, req,
-                    res_decorator{called});
+                ws.set_option(stream_base::decorator(
+                    res_decorator{called}));
+                api.accept(ws, req);
                 BEAST_EXPECT(called);
             });
         }
@@ -246,7 +256,7 @@ public:
             req.insert(http::field::sec_websocket_key, "dGhlIHNhbXBsZSBub25jZQ==");
             req.insert(http::field::sec_websocket_version, "13");
 
-            fail_loop([&](stream<test::stream>& ws)
+            fail_loop([&](stream<test::basic_stream<net::io_context::executor_type>>& ws)
             {
                 ws.next_layer().append("\x88\x82\xff\xff\xff\xff\xfc\x17");
                 api.accept(ws, req);
@@ -265,7 +275,7 @@ public:
         }
 
         // failed handshake (missing Sec-WebSocket-Key)
-        fail_loop([&](stream<test::stream>& ws)
+        fail_loop([&](stream<test::basic_stream<net::io_context::executor_type>>& ws)
         {
             ws.next_layer().append(
                 "GET / HTTP/1.1\r\n"
@@ -304,7 +314,7 @@ public:
 
         // request in stream
         {
-            stream<test::stream> ws{ioc,
+            stream<test::basic_stream<net::io_context::executor_type>> ws{ioc,
                 "GET / HTTP/1.1\r\n"
                 "Host: localhost\r\n"
                 "Upgrade: websocket\r\n"
@@ -330,7 +340,7 @@ public:
 
         // request in stream, decorator
         {
-            stream<test::stream> ws{ioc,
+            stream<test::basic_stream<net::io_context::executor_type>> ws{ioc,
                 "GET / HTTP/1.1\r\n"
                 "Host: localhost\r\n"
                 "Upgrade: websocket\r\n"
@@ -343,7 +353,9 @@ public:
             try
             {
                 bool called = false;
-                api.accept_ex(ws, res_decorator{called});
+                ws.set_option(stream_base::decorator(
+                    res_decorator{called}));
+                api.accept(ws);
                 BEAST_FAIL();
             }
             catch(system_error const& se)
@@ -357,7 +369,7 @@ public:
 
         // request in buffers
         {
-            stream<test::stream> ws{ioc};
+            stream<test::basic_stream<net::io_context::executor_type>> ws{ioc};
             auto tr = connect(ws.next_layer());
             try
             {
@@ -383,12 +395,14 @@ public:
 
         // request in buffers, decorator
         {
-            stream<test::stream> ws{ioc};
+            stream<test::basic_stream<net::io_context::executor_type>> ws{ioc};
             auto tr = connect(ws.next_layer());
             try
             {
                 bool called = false;
-                api.accept_ex(ws, net::buffer(
+                ws.set_option(stream_base::decorator(
+                    res_decorator{called}));
+                api.accept(ws, net::buffer(
                     "GET / HTTP/1.1\r\n"
                     "Host: localhost\r\n"
                     "Upgrade: websocket\r\n"
@@ -396,8 +410,7 @@ public:
                     "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\n"
                     "Sec-WebSocket-Version: 13\r\n"
                     + big +
-                    "\r\n"),
-                    res_decorator{called});
+                    "\r\n"));
                 BEAST_FAIL();
             }
             catch(system_error const& se)
@@ -410,7 +423,7 @@ public:
 
         // request in buffers and stream
         {
-            stream<test::stream> ws{ioc,
+            stream<test::basic_stream<net::io_context::executor_type>> ws{ioc,
                 "Connection: upgrade\r\n"
                 "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\n"
                 "Sec-WebSocket-Version: 13\r\n"
@@ -436,7 +449,7 @@ public:
 
         // request in buffers and stream, decorator
         {
-            stream<test::stream> ws{ioc,
+            stream<test::basic_stream<net::io_context::executor_type>> ws{ioc,
                 "Connection: upgrade\r\n"
                 "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\n"
                 "Sec-WebSocket-Version: 13\r\n"
@@ -446,11 +459,12 @@ public:
             try
             {
                 bool called = false;
-                api.accept_ex(ws, websocket_test_suite::sbuf(
+                ws.set_option(stream_base::decorator(
+                    res_decorator{called}));
+                api.accept(ws, websocket_test_suite::sbuf(
                     "GET / HTTP/1.1\r\n"
                     "Host: localhost\r\n"
-                    "Upgrade: websocket\r\n"),
-                    res_decorator{called});
+                    "Upgrade: websocket\r\n"));
                 BEAST_FAIL();
             }
             catch(system_error const& se)
@@ -486,7 +500,7 @@ public:
                     n = s.size() - 1;
                     break;
                 }
-                stream<test::stream> ws(ioc);
+                stream<test::basic_stream<net::io_context::executor_type>> ws(ioc);
                 auto tr = connect(ws.next_layer());
                 ws.next_layer().append(
                     s.substr(n, s.size() - n));
@@ -647,7 +661,7 @@ public:
     {
         net::io_context ioc;
         {
-            stream<test::stream> ws(ioc);
+            stream<test::basic_stream<net::io_context::executor_type>> ws(ioc);
             auto tr = connect(ws.next_layer());
             tr.close();
             try
@@ -664,7 +678,8 @@ public:
             }
         }
         {
-            stream<test::stream> ws(ioc);
+            stream<test::basic_stream<net::io_context::executor_type>>
+                ws(ioc.get_executor());
             auto tr = connect(ws.next_layer());
             tr.close();
             try
@@ -702,8 +717,8 @@ public:
         }
 
         {
-            stream<test::stream> ws1(ioc);
-            stream<test::stream> ws2(ioc);
+            stream<test::basic_stream<net::io_context::executor_type>> ws1(ioc);
+            stream<test::basic_stream<net::io_context::executor_type>> ws2(ioc);
             test::connect(ws1.next_layer(), ws2.next_layer());
 
             ws1.async_handshake("test", "/", test::success_handler());
@@ -728,8 +743,8 @@ public:
         }
 
         {
-            stream<test::stream> ws1(ioc);
-            stream<test::stream> ws2(ioc);
+            stream<test::basic_stream<net::io_context::executor_type>> ws1(ioc);
+            stream<test::basic_stream<net::io_context::executor_type>> ws2(ioc);
             test::connect(ws1.next_layer(), ws2.next_layer());
 
             ws1.set_option(stream_base::timeout{
@@ -757,8 +772,8 @@ public:
         }
 
         {
-            stream<test::stream> ws1(ioc);
-            stream<test::stream> ws2(ioc);
+            stream<test::basic_stream<net::io_context::executor_type>> ws1(ioc);
+            stream<test::basic_stream<net::io_context::executor_type>> ws2(ioc);
             test::connect(ws1.next_layer(), ws2.next_layer());
 
             ws1.set_option(stream_base::timeout{
@@ -801,6 +816,27 @@ public:
         }
     }
 
+#if BOOST_ASIO_HAS_CO_AWAIT
+    void testAwaitableCompiles(
+        stream<net::ip::tcp::socket>& s,
+        http::request<http::empty_body>& req,
+        net::mutable_buffer buf
+        )
+    {
+        static_assert(std::is_same_v<
+            net::awaitable<void>, decltype(
+            s.async_accept(net::use_awaitable))>);
+
+        static_assert(std::is_same_v<
+            net::awaitable<void>, decltype(
+            s.async_accept(req, net::use_awaitable))>);
+
+        static_assert(std::is_same_v<
+            net::awaitable<void>, decltype(
+            s.async_accept(buf, net::use_awaitable))>);
+    }
+#endif
+
     void
     run() override
     {
@@ -811,6 +847,9 @@ public:
         testInvalidInputs();
         testEndOfStream();
         testAsync();
+#if BOOST_ASIO_HAS_CO_AWAIT
+        boost::ignore_unused(&accept_test::testAwaitableCompiles);
+#endif
     }
 };
 
